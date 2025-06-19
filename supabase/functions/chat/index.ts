@@ -51,9 +51,21 @@ serve(async (req) => {
     }
     
     const generatedText = data.choices[0].message.content;
+    
+    // トークン使用量をログ出力
+    if (data.usage) {
+      console.log('=== トークン使用量 ===');
+      console.log(`入力トークン数: ${data.usage.prompt_tokens}`);
+      console.log(`出力トークン数: ${data.usage.completion_tokens}`);
+      console.log(`合計トークン数: ${data.usage.total_tokens}`);
+      console.log('=====================');
+    }
 
     return new Response(
-      JSON.stringify({ generatedText }),
+      JSON.stringify({ 
+        generatedText,
+        usage: data.usage // トークン情報をレスポンスに含める
+      }),
       { 
         headers: { 
           ...corsHeaders, 

@@ -37,17 +37,20 @@ export const SuppliesListDialog = ({
     cartItems
   } = useSupplies();
 
+  // 数値として扱うために変換
+  const numericPeopleCount = typeof peopleCount === 'number' ? peopleCount : 0;
+
   // 初回のみロードするための状態
   const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   // 企業形態と人数に基づく推奨備蓄品を取得
   const { filteredItems, isLoading } = useFilteredRecommendedItems(
     selectedCorporateType,
-    peopleCount
+    numericPeopleCount
   );
   
   // すべての備蓄品アイテムを取得（法人形態でフィルタリングしない）
-  const { data: allItems } = useAllRecommendedStockItems(peopleCount);
+  const { data: allItems } = useAllRecommendedStockItems(numericPeopleCount);
 
   // カート内のアイテムから合計金額を計算
   const totalPrice = useMemo(() => {
@@ -135,7 +138,7 @@ export const SuppliesListDialog = ({
               <p className="font-bold text-lg">重度な地震&水害</p>
             </div>
             <div className="bg-white rounded p-4 border-2 border-dashed border-gray-400 text-center">
-              <p className="font-bold text-lg">{peopleCount}人分 (3日分)</p>
+              <p className="font-bold text-lg">{numericPeopleCount}人分 (3日分)</p>
             </div>
             <div className="bg-white rounded p-4 border-2 border-dashed border-gray-400 text-center">
               <p className="font-bold text-lg">総計：{totalPrice.toLocaleString()}円</p>

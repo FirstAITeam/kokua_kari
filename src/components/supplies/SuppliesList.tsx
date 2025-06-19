@@ -13,9 +13,12 @@ export const SuppliesList: React.FC = () => {
   const { selectedCorporateType, peopleCount, addToCart } = useSupplies();
   const { toast } = useToast();
   
+  // peopleCountが空文字列の場合は0を渡すように修正
+  const actualPeopleCount = typeof peopleCount === 'number' ? peopleCount : 0;
+  
   const { filteredItems, isLoading: isLoadingItems } = useFilteredRecommendedItems(
     selectedCorporateType,
-    peopleCount
+    actualPeopleCount
   );
   
   const itemsByPhase = useMemo(() => {

@@ -83,6 +83,15 @@ ${JSON.stringify(allStockItems, null, 2)}
       throw new Error("OpenAI APIからの応答形式が不正です。");
     }
     
+    // トークン使用量をログ出力
+    if (data.usage) {
+      console.log('=== 備蓄品処理 トークン使用量 ===');
+      console.log(`入力トークン数: ${data.usage.prompt_tokens}`);
+      console.log(`出力トークン数: ${data.usage.completion_tokens}`);
+      console.log(`合計トークン数: ${data.usage.total_tokens}`);
+      console.log('================================');
+    }
+    
     const aiResponse = data.choices[0].message.content;
     console.log("AI response:", aiResponse);
     
@@ -132,7 +141,8 @@ ${JSON.stringify(allStockItems, null, 2)}
         JSON.stringify({ 
           newSupplies, 
           explanation,
-          removedItems: removedItemsComputed
+          removedItems: removedItemsComputed,
+          usage: data.usage // トークン情報を追加
         }),
         { 
           headers: { 
@@ -148,7 +158,8 @@ ${JSON.stringify(allStockItems, null, 2)}
         JSON.stringify({ 
           newSupplies, 
           explanation,
-          removedItems
+          removedItems,
+          usage: data.usage // トークン情報を追加
         }),
         { 
           headers: { 

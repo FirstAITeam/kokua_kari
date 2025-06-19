@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { ProgressStep, StepData } from '@/types/chat';
 
@@ -52,7 +53,7 @@ export const useProgressManager = () => {
     { id: 'step1', label: 'STEP①', sublabel: '住所入力' },
     { id: 'step2', label: 'STEP②', sublabel: '法人選択' },
     { id: 'step3', label: 'リスク診断\n対策提案' },
-    { id: 'step4', label: 'STEP③', sublabel: '人数規模' },
+    { id: 'step4', label: 'STEP④', sublabel: 'AIと絞り込み' },
     { id: 'step5', label: '理想備蓄品\nと見積もり' },
     { id: 'step6', label: 'STEP④', sublabel: 'AIと絞り込み' },
     { id: 'step7', label: 'STEP⑤', sublabel: '商品選択' },

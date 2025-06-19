@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChatInterface } from "../ChatInterface";
-import { QuestionDetail } from '@/types/chat';
+import { QuestionDetail, Message } from '@/types/chat';
 
 interface ChatSectionProps {
   currentQuestionDetail: QuestionDetail;
@@ -11,6 +11,7 @@ interface ChatSectionProps {
   currentStep: string;
   onShowDiagnosisResult: () => void;
   onReopenDiagnosisDialog?: (reopenFn: () => void) => void;
+  initialChatHistory?: Message[] | null;
 }
 
 export const ChatSection: React.FC<ChatSectionProps> = ({
@@ -20,11 +21,12 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   updateProgressStep,
   currentStep,
   onShowDiagnosisResult,
-  onReopenDiagnosisDialog
+  onReopenDiagnosisDialog,
+  initialChatHistory
 }) => {
-  // If we're at step 6 (AI interaction), update the question detail
+  // If we're at step 4 or 6 (AI interaction), update the question detail
   React.useEffect(() => {
-    if (currentStep === 'step6') {
+    if (currentStep === 'step4' || currentStep === 'step6') {
       setCurrentQuestionDetail({
         title: "AI対話による絞り込み",
         description: "商品リストを最適化するためにAIと対話しましょう。",
@@ -49,6 +51,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
           currentStep={currentStep}
           onShowDiagnosisResult={onShowDiagnosisResult}
           onReopenDiagnosisDialog={onReopenDiagnosisDialog}
+          initialChatHistory={initialChatHistory}
         />
       </div>
     </div>

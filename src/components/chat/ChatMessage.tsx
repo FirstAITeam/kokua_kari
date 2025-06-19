@@ -10,11 +10,11 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message, index, onOptionClick }: ChatMessageProps) => {
   const hasOptions = message.options && message.options.length > 0;
-
+  
   const handleOptionClick = (option: string) => {
     onOptionClick(option, index);
   };
-
+  
   return (
     <div className={`flex items-start gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
       <div className={`w-12 h-12 rounded-full flex-shrink-0 overflow-hidden ${
@@ -27,10 +27,10 @@ export const ChatMessage = ({ message, index, onOptionClick }: ChatMessageProps)
         )}
       </div>
       <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
-        <div
+        <div 
           className={`rounded-[20px] p-4 relative ${
-            message.role === 'user'
-              ? 'bg-[#40414F] text-white'
+            message.role === 'user' 
+              ? 'bg-[#40414F] text-white' 
               : 'bg-white border-2 border-[#40414F]/20'
           }`}
         >

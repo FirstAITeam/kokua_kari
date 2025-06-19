@@ -9,10 +9,13 @@ export const PeopleCountInput: React.FC = () => {
   const { peopleCount, setPeopleCount } = useSupplies();
   const { toast } = useToast();
 
+  // 数値として扱うために変換
+  const numericPeopleCount = typeof peopleCount === 'number' ? peopleCount : 0;
+
   const handleIncreasePeople = () => {
-    setPeopleCount((prev: number) => {
+    setPeopleCount((prev: number | '') => {
       // 0の場合は初期値として5に設定
-      const baseValue = prev === 0 ? 5 : prev;
+      const baseValue = typeof prev !== 'number' || prev === 0 ? 5 : prev;
       const newCount = baseValue + 5;
       toast({
         title: "人数を増やしました",
@@ -23,8 +26,8 @@ export const PeopleCountInput: React.FC = () => {
   };
   
   const handleDecreasePeople = () => {
-    setPeopleCount((prev: number) => {
-      if (prev <= 5) return prev;
+    setPeopleCount((prev: number | '') => {
+      if (typeof prev !== 'number' || prev <= 5) return prev;
       const newCount = prev - 5;
       toast({
         title: "人数を減らしました",
@@ -43,13 +46,13 @@ export const PeopleCountInput: React.FC = () => {
             variant="outline" 
             size="icon"
             onClick={handleDecreasePeople}
-            disabled={peopleCount <= 5}
+            disabled={numericPeopleCount <= 5}
             className="h-8 w-8 rounded-full"
           >
             <Minus className="h-4 w-4" />
           </Button>
           <span className="text-xl font-bold min-w-[80px] text-center">
-            {peopleCount > 0 ? `${peopleCount}人` : ""}
+            {numericPeopleCount > 0 ? `${numericPeopleCount}人` : ""}
           </span>
           <Button 
             variant="outline" 

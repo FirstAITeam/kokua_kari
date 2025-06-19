@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { ScenarioStep } from '@/types/chat';
 
@@ -88,6 +89,11 @@ export const useScenarioSteps = () => {
     return currentStepData?.question_text || '';
   }, [currentStep, steps]);
 
+  // ChatInterfaceで必要とされるプロパティを追加
+  const currentStepOptions = getCurrentStepOptions();
+  const isLoading = false;
+  const scenarioData = steps;
+
   return {
     currentStep,
     setCurrentStep,
@@ -95,8 +101,9 @@ export const useScenarioSteps = () => {
     updateStepStatus,
     moveToNextStep,
     moveToPreviousStep,
-    currentStepOptions: getCurrentStepOptions(),
+    currentStepOptions,
     currentStepText: getCurrentStepText(),
-    isLoading: false
+    isLoading,
+    scenarioData
   };
 };

@@ -1,11 +1,21 @@
-import React, { useCallback, useEffect } from "react";
+
+import React, { useCallback, useEffect, useState } from "react";
 import { Header } from "../components/layout/Header";
 import { DiagnosisSection } from "../components/diagnosis/DiagnosisSection";
 import { ChatSection } from "../components/diagnosis/ChatSection";
 import { useDiagnosisState } from "../hooks/useDiagnosisState";
 import { useProgressManager } from "../hooks/useProgressManager";
+import { useLocation } from "react-router-dom";
+import { Message } from "@/types/chat";
 
 const Index = () => {
+  const location = useLocation();
+  const goToStep4 = location.state?.goToStep4 || false;
+  const preserveChat = location.state?.preserveChat || false;
+  
+  // ストレージからチャット履歴を復元するための状態
+  const [initialChatHistory, setInitialChatHistory] = useState<Message[] | null>(null);
+
   const {
     selectedDetail,
     setSelectedDetail,
@@ -39,6 +49,30 @@ const Index = () => {
     }
   }, [showDiagnosisResult, currentStep, setCurrentStep, setCompletedSteps]);
 
+  // 戻るボタンからSTEP4に直接戻る場合の処理
+  useEffect(() => {
+    if (goToStep4) {
+      setCurrentStep('step4');
+      setCompletedSteps(['step1', 'step2', 'step3']);
+      
+      // チャット履歴をローカルストレージから復元（preserveChatがtrueの場合）
+      if (preserveChat) {
+        try {
+          const savedMessages = localStorage.getItem('chatMessages');
+          if (savedMessages) {
+            const parsedMessages = JSON.parse(savedMessages);
+            setInitialChatHistory(parsedMessages);
+          }
+        } catch (error) {
+          console.error('チャット履歴の復元に失敗しました:', error);
+        }
+      }
+      
+      // ステートをリセットして新しい遷移でフラグが残らないようにする
+      window.history.replaceState({}, document.title);
+    }
+  }, [goToStep4, preserveChat, setCurrentStep, setCompletedSteps]);
+
   const handleReopenDialogCallback = useCallback((reopenFn: () => void) => {
     setReopenDiagnosisDialog(() => reopenFn);
   }, []);
@@ -66,6 +100,7 @@ const Index = () => {
             currentStep={currentStep}
             onShowDiagnosisResult={handleShowDiagnosisResult}
             onReopenDiagnosisDialog={handleReopenDialogCallback}
+            initialChatHistory={initialChatHistory}
           />
         </div>
       </main>

@@ -12,6 +12,9 @@ export const DiagnosisSuppliesList: React.FC = () => {
   // SuppliesContextから人数情報を取得
   const { peopleCount, setPeopleCount, selectedCorporateType } = useSupplies();
   
+  // 数値として扱うために変換
+  const numericPeopleCount = typeof peopleCount === 'number' ? peopleCount : 0;
+  
   // 通知のためのtoast
   const { toast } = useToast();
   
@@ -19,7 +22,7 @@ export const DiagnosisSuppliesList: React.FC = () => {
   const handleIncreasePeople = () => {
     setPeopleCount(prev => {
       // 0の場合は初期値として5に設定
-      const baseValue = prev === 0 ? 5 : prev;
+      const baseValue = typeof prev !== 'number' || prev === 0 ? 5 : prev;
       const newCount = baseValue + 5;
       toast({
         title: "人数を増やしました",
@@ -31,7 +34,7 @@ export const DiagnosisSuppliesList: React.FC = () => {
   
   const handleDecreasePeople = () => {
     setPeopleCount(prev => {
-      if (prev <= 5) return prev;
+      if (typeof prev !== 'number' || prev <= 5) return prev;
       const newCount = prev - 5;
       toast({
         title: "人数を減らしました",
@@ -44,7 +47,7 @@ export const DiagnosisSuppliesList: React.FC = () => {
   // 企業形態のみに基づく推奨備蓄品を取得（災害リスクは考慮しない）
   const { filteredItems, isLoading: isLoadingItems } = useFilteredRecommendedItems(
     selectedCorporateType,
-    peopleCount
+    numericPeopleCount
   );
   
   // フェーズごとに備蓄品をグループ化
@@ -100,13 +103,13 @@ export const DiagnosisSuppliesList: React.FC = () => {
               variant="outline" 
               size="icon"
               onClick={handleDecreasePeople}
-              disabled={peopleCount <= 5}
+              disabled={numericPeopleCount <= 5}
               className="h-8 w-8 rounded-full"
             >
               <Minus className="h-4 w-4" />
             </Button>
             <span className="text-xl font-bold min-w-[80px] text-center">
-              {peopleCount > 0 ? `${peopleCount}人` : ""}
+              {numericPeopleCount > 0 ? `${numericPeopleCount}人` : ""}
             </span>
             <Button 
               variant="outline" 
@@ -144,7 +147,7 @@ export const DiagnosisSuppliesList: React.FC = () => {
         return (
           <div key={phase} className="space-y-3">
             <h3 className="text-lg font-bold bg-gray-100 p-2 rounded flex justify-between">
-              <span>{phase}の備蓄品（{peopleCount}人規模）</span>
+              <span>{phase}の備蓄品（{numericPeopleCount}人規模）</span>
               <span className="font-normal text-gray-600">小計: {phaseTotal.toLocaleString()}円</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

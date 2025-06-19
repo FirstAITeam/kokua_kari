@@ -10,7 +10,7 @@ export async function processSuppliesWithSupabaseFunction(
   currentSupplies: Supply[],
   fullStockItemsData: RecommendedStockItem[],
   allStockItemsData: RecommendedStockItem[]
-): Promise<{newSupplies: Supply[], explanation: string, removedItems: string[]}> {
+): Promise<{newSupplies: Supply[], explanation: string, removedItems: string[], usage?: any}> {
   try {
     console.log("Calling Supabase Edge Function for supplies processing");
     
@@ -30,6 +30,15 @@ export async function processSuppliesWithSupabaseFunction(
 
     console.log("Supabase Edge Function response:", data);
     
+    // トークン使用量をログ出力
+    if (data.usage) {
+      console.log('=== フロントエンド: トークン使用量 ===');
+      console.log(`入力トークン数: ${data.usage.prompt_tokens}`);
+      console.log(`出力トークン数: ${data.usage.completion_tokens}`);
+      console.log(`合計トークン数: ${data.usage.total_tokens}`);
+      console.log('===================================');
+    }
+    
     if (!data || !data.newSupplies || !data.explanation) {
       throw new Error('無効なレスポンス形式です');
     }
@@ -37,7 +46,8 @@ export async function processSuppliesWithSupabaseFunction(
     return {
       newSupplies: data.newSupplies,
       explanation: data.explanation,
-      removedItems: data.removedItems || []
+      removedItems: data.removedItems || [],
+      usage: data.usage
     };
   } catch (error) {
     console.error("備蓄品処理中にエラー:", error);
@@ -50,7 +60,7 @@ export async function processSuppliesWithSupabaseFunction(
 }
 
 // OpenAI APIを直接呼び出してSuppliesリストを処理する関数
-export async function callOpenAIChat(userMessage: string): Promise<string> {
+export async function callOpenAIChat(userMessage: string): Promise<{generatedText: string, usage?: any}> {
   try {
     const { data, error } = await supabase.functions.invoke('chat', {
       body: { prompt: userMessage }
@@ -58,13 +68,25 @@ export async function callOpenAIChat(userMessage: string): Promise<string> {
 
     if (error) {
       console.error('エラー:', error);
-      return "申し訳ありません。会話中にエラーが発生しました。";
+      return { generatedText: "申し訳ありません。会話中にエラーが発生しました。" };
     }
 
-    return data.generatedText || "応答を生成できませんでした。";
+    // トークン使用量をログ出力
+    if (data.usage) {
+      console.log('=== チャット: トークン使用量 ===');
+      console.log(`入力トークン数: ${data.usage.prompt_tokens}`);
+      console.log(`出力トークン数: ${data.usage.completion_tokens}`);
+      console.log(`合計トークン数: ${data.usage.total_tokens}`);
+      console.log('===============================');
+    }
+
+    return {
+      generatedText: data.generatedText || "応答を生成できませんでした。",
+      usage: data.usage
+    };
   } catch (error) {
     console.error('OpenAI API呼び出しエラー:', error);
-    return "申し訳ありません。会話中にエラーが発生しました。";
+    return { generatedText: "申し訳ありません。会話中にエラーが発生しました。" };
   }
 }
 
@@ -75,7 +97,7 @@ export async function filterSuppliesWithAI(
   fullStockItemsData: RecommendedStockItem[],
   allStockItemsData: RecommendedStockItem[],
   removeFromCartByName: (name: string) => void // カートから名前でアイテムを削除する関数を追加
-): Promise<{newSupplies: Supply[], explanation: string, removedItems: string[]}> {
+): Promise<{newSupplies: Supply[], explanation: string, removedItems: string[], usage?: any}> {
   try {
     // リクエスト前にデータをログ出力
     console.log("Request to process supplies:", {
@@ -92,7 +114,7 @@ export async function filterSuppliesWithAI(
       allStockItemsData
     );
     
-    const { newSupplies, explanation, removedItems } = result;
+    const { newSupplies, explanation, removedItems, usage } = result;
     
     // 削除されたアイテムがあるかログ出力
     if (removedItems && removedItems.length > 0) {
@@ -105,10 +127,19 @@ export async function filterSuppliesWithAI(
       });
     }
     
+    // トークン使用量をトーストで表示
+    if (usage) {
+      toast({
+        title: "トークン使用量",
+        description: `入力: ${usage.prompt_tokens}, 出力: ${usage.completion_tokens}, 合計: ${usage.total_tokens}`,
+      });
+    }
+    
     return {
       newSupplies,
       explanation,
-      removedItems
+      removedItems,
+      usage
     };
   } catch (error) {
     console.error("LLMによる備蓄品リスト更新処理でエラー:", error);

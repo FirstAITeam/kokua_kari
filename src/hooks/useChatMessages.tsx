@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Message, QuestionDetail } from "@/types/chat";
 import { Dispatch, SetStateAction } from 'react';
@@ -8,14 +9,16 @@ interface UseChatMessagesProps {
   setCurrentQuestionDetail: Dispatch<SetStateAction<QuestionDetail>>;
   setSelectedDetail: Dispatch<SetStateAction<'budget' | 'effectiveness' | 'categories' | 'quality' | 'quantity' | 'question'>>;
   updateProgressStep?: (stepId: string, isActive: boolean, isCompleted: boolean) => void;
+  initialMessages?: Message[];
 }
 
 export const useChatMessages = ({
   setCurrentQuestionDetail,
   setSelectedDetail,
-  updateProgressStep
+  updateProgressStep,
+  initialMessages
 }: UseChatMessagesProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages || []);
   const [awaitingZipCodeInput, setAwaitingZipCodeInput] = useState(false);
   const [zipCodeError, setZipCodeError] = useState<string | null>(null);
   const [isAnalyzingRisk, setIsAnalyzingRisk] = useState(false);
@@ -28,7 +31,7 @@ export const useChatMessages = ({
   const { riskData, error, isLoadingRisk } = useDisasterRisk(shouldAnalyzeRisk ? currentAddress : null);
 
   useEffect(() => {
-    if (!messages.length) {
+    if (!messages.length && !initialMessages) {
       setMessages([
         {
           role: 'ai',
@@ -50,7 +53,7 @@ export const useChatMessages = ({
         updateProgressStep('address', true, false);
       }
     }
-  }, []); // 初回マウント時のみ実行
+  }, [messages.length, initialMessages, setCurrentQuestionDetail, setSelectedDetail, updateProgressStep]); // 初期メッセージの有無も考慮
 
   useEffect(() => {
     console.log("currentAddress updated:", currentAddress);
